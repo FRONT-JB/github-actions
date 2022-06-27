@@ -1,47 +1,34 @@
-name: CI
+name: Caching with npm
 
-on:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - "pages/**"
+on: push
 
 jobs:
-  condition:
-    name: Check Lint & Test Condition
+  build:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
         with:
-          node-version: "16.14.x"
-          check-latest: true
+          path: ~/.yarn
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
 
       - name: Install Dependencies
         run: yarn install
 
-      - name: Run Next Lint
+      - name: Test
         run: yarn lint
 
-      - name: Run tests with jest
+      - name: Test
         run: yarn test:ci
 
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    needs: [condition]
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2-beta
-        with:
-          node-version: "16.14.x"
-          check-latest: true
-
-      - name: Install Dependencies
-        run: yarn install
-
-      - name: Run build
+      - name: Build
         run: yarn build
