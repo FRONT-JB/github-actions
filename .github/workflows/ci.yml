@@ -1,34 +1,24 @@
-name: Caching with npm
+name: Automated Tests and Linting
 
-on: push
+on: [push]
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
 
-      - name: Cache node modules
-        uses: actions/cache@v2
-        env:
-          cache-name: cache-node-modules
+      - uses: actions/cache@v2
         with:
-          path: ~/.yarn
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+          path: "**/node_modules"
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
 
-      - name: Install Dependencies
+      - name: Install packages
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install
 
-      - name: Test
+      - name: Run Typescript Checks
         run: yarn lint
 
-      - name: Test
+      - name: Run Tests
         run: yarn test:ci
-
-      - name: Build
-        run: yarn build
