@@ -1,11 +1,28 @@
+import Time from "@/components/Time";
+import { format } from "date-fns";
+import useRealTimes from "hooks/useRealTimes";
 import { GetStaticPropsContext } from "next";
+import dynamic from "next/dynamic";
 import { PostTypes } from ".";
 
-const PostDetail = ({ postDetail }: { postDetail: PostTypes }) => {
+const DynamicSSGTime = dynamic(() => import("@/components/Time"), {
+  ssr: false,
+});
+
+const PostDetail = ({
+  postDetail,
+  time,
+}: {
+  postDetail: PostTypes;
+  time: any;
+}) => {
+  const CSR_TIME = useRealTimes();
   return (
     <div style={{ padding: "10px" }}>
       <span>{postDetail.id}</span>
       <p>{postDetail.body}</p>
+      <DynamicSSGTime time={time} realTime="" />
+      <DynamicSSGTime realTime={CSR_TIME} />
     </div>
   );
 };
@@ -18,7 +35,7 @@ export const getStaticPaths = async () => {
   const paths = posts.map((post) => ({ params: { id: String(post.id) } }));
   return {
     paths,
-    fallback: false,
+    fallback: "blocking",
   };
 };
 
@@ -28,9 +45,14 @@ export const getStaticProps = async (ctx: GetStaticPropsContext) => {
     `https://jsonplaceholder.typicode.com/posts/${postId}`
   );
   const postDetail = await res.json();
+  const timesRes = await fetch("https://worldtimeapi.org/api/ip");
+  const { datetime } = await timesRes.json();
+
   return {
     props: {
       postDetail,
+      time: datetime,
     },
+    revalidate: 10,
   };
 };
