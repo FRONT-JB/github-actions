@@ -5,3 +5,4 @@
 "📍 Chore": ["doc/*", "misc/*", "chore/*", "deps/*"]
 "👻 BugFix": ["fix/*", "fix*"]
 "⚙ Setting": ["setting/*", "settings/*"]
+"👏🏻 Review": "*"
