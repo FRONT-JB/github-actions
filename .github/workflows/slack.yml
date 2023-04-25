@@ -7,7 +7,7 @@ jobs:
   deploy:
     name: Deploy
     # Change below line to: `runs-on: ubuntu-latest` if not using self-hosted runners or if it is a public repo.
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     steps:
       - name: Slack Notification
         uses: rtCamp/action-slack-notify@master
